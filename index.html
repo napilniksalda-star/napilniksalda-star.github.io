@@ -214,6 +214,16 @@
   .contact:hover .copyicon{color:var(--accent)}
   .contact.copied{border-color:var(--accent); background:var(--accent-soft)}
   .contact.copied .copyicon{color:var(--accent)}
+  /* кнопка скачивания PDF (для передачи ЛПР) */
+  .dl-btn{display:flex; align-items:center; gap:14px; padding:15px 18px; margin-top:2px;
+    border:1px solid var(--accent); background:var(--accent-soft); text-decoration:none; color:inherit;
+    transition:background .2s ease, transform .2s ease, color .2s ease}
+  .dl-btn:hover{background:var(--accent); color:#141414; transform:translateX(3px)}
+  .dl-btn .dl-tag{font-size:10.5px; letter-spacing:.14em; border:1px solid currentColor; padding:3px 7px; flex:none}
+  .dl-btn .dl-tx{font-weight:600; letter-spacing:.01em}
+  .dl-btn .dl-tx em{display:block; font-style:normal; font-size:11px; letter-spacing:.02em; color:var(--muted); margin-top:2px}
+  .dl-btn:hover .dl-tx em{color:#141414}
+  .dl-btn .dl-ar{margin-left:auto; font-size:16px}
 
   /* тост */
   .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(14px);
@@ -275,6 +285,7 @@
         <div class="cta-row">
           <a class="btn btn-primary" href="#contact">Тестовый узел без обязательств</a>
           <a class="btn btn-ghost" href="#services">Что можно заказать <span class="mono">↓</span></a>
+          <a class="btn btn-ghost" href="https://napilniksalda-star.github.io/portfolio-evstegneev.pdf" download>Скачать PDF <span class="mono">↓</span></a>
         </div>
         <div class="chips">
           <span class="chip">Листовой металл</span>
@@ -449,6 +460,11 @@
           <button class="contact" type="button" data-copy="@dendifox">
             <span class="k mono">Telegram</span><span class="v">@dendifox</span><span class="copyicon mono" aria-hidden="true">⧉</span>
           </button>
+          <a class="dl-btn" href="https://napilniksalda-star.github.io/portfolio-evstegneev.pdf" download>
+            <span class="dl-tag mono">PDF</span>
+            <span class="dl-tx">Скачать портфолио<em>переслать руководителю или распечатать</em></span>
+            <span class="dl-ar mono" aria-hidden="true">↓</span>
+          </a>
         </div>
       </div>
     </div>
