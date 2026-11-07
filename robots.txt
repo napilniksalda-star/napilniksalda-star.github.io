@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://napilniksalda-star.github.io/sitemap.xml
