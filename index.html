@@ -249,7 +249,9 @@
     .stage{aspect-ratio:4/3}
     .chapter-copy h3{font-size:clamp(40px,12vw,64px); margin-top:-.4em}
     .viewer{height:clamp(320px,56vh,520px)}
-    .board{padding:14px}
+    /* длинная кассета на телефоне ужалась бы в полоску — чертёж листается пальцем, как лист */
+    .board{padding:14px; overflow-x:auto; -webkit-overflow-scrolling:touch}
+    .board .draw-svg{min-width:760px}
     .route{grid-template-columns:1fr; padding-top:0; padding-left:26px}
     .route::before{left:5px; right:auto; top:0; bottom:0; width:2px; height:auto; background:var(--vice)}
     .step::before{top:12px; left:-26px}
