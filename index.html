@@ -59,7 +59,6 @@
   .hero-media img,.hero-media video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
   .hero-media video{opacity:0; transition:opacity .9s ease, transform 14s linear}
   .hero-media video.on{opacity:1}
-  .hero-media.done video{transform:scale(1.06)}                 /* ролик кончился — камера медленно наезжает, кадр не замирает */
   /* закатный свет поверх рендера: градиент умножением, снизу — тьма под текст */
   .hero-tint{position:absolute; inset:0; background:var(--vice); mix-blend-mode:multiply; opacity:.92}
   .hero-shade{position:absolute; inset:0;
@@ -109,7 +108,7 @@
   .facts dt{font-size:13px; color:var(--paper-faint); margin-bottom:4px}
   .facts dd{margin:0; font-weight:500}
 
-  /* ============ РАБОТЫ: главы, видео играет один раз при появлении ============ */
+  /* ============ РАБОТЫ: главы, видео играет по кругу, пока глава на экране ============ */
   .works{padding:clamp(60px,10vh,120px) 0 0}
   .sec-title{margin:0; font-size:clamp(64px,10vw,160px)}
   .sec-lead{color:var(--paper-dim); max-width:46em; margin-top:18px}
@@ -119,7 +118,6 @@
   .stage>img,.stage>video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
   .stage .reel{opacity:0; transition:opacity .6s ease, transform 12s linear}
   .stage .reel.on{opacity:1}
-  .stage.done .reel{transform:scale(1.06)}                      /* после ролика — медленный наезд, без повтора */
   .stage::after{content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
     box-shadow:inset 0 0 0 1px rgba(255,242,232,.08), inset 0 -170px 150px -70px rgba(20,10,34,.9)}
   /* телефон заблокировал автозапуск — подсказка «нажмите», видео пойдёт по касанию */
@@ -142,7 +140,7 @@
   .chapter-copy{position:relative; z-index:2; display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:14px clamp(24px,4vw,64px); padding:0 clamp(8px,2vw,28px)}
   .chapter-copy h3{grid-column:1/-1; margin:-.5em 0 0; font-size:clamp(40px,6.4vw,100px); text-shadow:0 4px 30px rgba(20,10,34,.8);
     transform:translateX(-24px); opacity:.25; transition:transform .9s cubic-bezier(.2,.7,.2,1), opacity .9s ease}
-  .chapter.in .chapter-copy h3{transform:none; opacity:1}       /* заголовок выезжает один раз, когда глава появилась */
+  .chapter.in .chapter-copy h3{transform:none; opacity:1}       /* заголовок выезжает каждый раз, когда глава появилась */
   .chapter-copy .what{color:var(--paper-dim); max-width:40em}
   .chapter-copy .result{font-weight:600; align-self:start; padding-left:16px; border-left:3px solid; border-image:var(--vice) 1}
   .chapter-copy .more{display:block; margin-top:8px; font-weight:500; color:var(--sun); text-decoration:none; border-bottom:1px solid rgba(255,209,102,.4)}
@@ -189,6 +187,8 @@
   .board.arm .cut{stroke-dasharray:1px; stroke-dashoffset:1px;
     transition:stroke-dashoffset var(--t,.4s) linear var(--d,0s)}
   .board.arm.drawn .cut{stroke-dashoffset:0px}
+  .board.arm.wipe .cut{transition:stroke-dashoffset .6s ease-in 0s}   /* лист разом гаснет перед новым кругом */
+  .snap,.snap *{transition:none!important}                            /* мгновенный сброс эффекта за экраном */
   .drawing .fname{margin-top:12px; font-size:13px; color:var(--paper-faint)}
 
   /* ============ ЦИФРЫ-ПРУФЫ: считаются один раз при появлении ============ */
@@ -320,7 +320,7 @@
     .hero-copy>*,.nav{opacity:1; transform:none}
     .hero-media{transform:none!important}
     .chapter-copy h3{transform:none; opacity:1}
-    .portrait.in img,.chapter.in .chapter-aside .frame>img,.stage.done .reel,.hero-media.done video{transform:none}
+    .portrait.in img,.chapter.in .chapter-aside .frame>img{transform:none}
     .board .cut{stroke-dasharray:none; stroke-dashoffset:0}
   }
 </style>
@@ -384,7 +384,7 @@
     <div class="chapters">
 
       <article class="chapter has-aside" data-chapter>
-        <div class="stage" data-live-at="3.85">
+        <div class="stage" data-live-at="7.32">
           <img src="media/tank.jpg" alt="3D-модель гусеничного робота в SolidWorks: открытый кузов, гусеницы, опорные катки" loading="lazy">
           <video class="reel" muted playsinline preload="none" aria-hidden="true" data-src="media/reel-tank.mp4"></video>
           <span class="phase" aria-hidden="true"><span class="ph-model">3D-модель в SolidWorks</span><span class="ph-live">собран и едет</span></span>
@@ -851,15 +851,15 @@
       var pr = v.play();
       if (pr && pr.catch) pr.catch(function(){ host.classList.add("blocked"); });
     }
+    /* ролики идут по кругу, пока их видно; ушли с экрана — пауза, вернулись — с начала */
     function wireVideo(v, host){
-      v.loop = false;
+      v.loop = true;
       v.addEventListener("playing", function(){ v.classList.add("on"); host.classList.remove("blocked"); });
-      v.addEventListener("ended", function(){ host.classList.add("done"); });   /* замер на последнем кадре + медленный наезд */
       v.addEventListener("error", function(){ v.remove(); host._v = null; });
-      host.addEventListener("click", function(){ if (host._v && host._v.paused && !host._v.ended) tryPlay(host._v, host); });
+      host.addEventListener("click", function(){ if (host._v && host._v.paused) tryPlay(host._v, host); });
     }
 
-    /* ---- герой: ролик идёт один раз, без петли ---- */
+    /* ---- герой: ролик по кругу, пока герой на экране ---- */
     var heroMedia = document.getElementById("heroMedia"), heroVideo = document.getElementById("heroVideo");
     var hsrc = heroVideo && heroVideo.getAttribute("data-src");
     if (heroVideo && hsrc && hsrc.indexOf("{{") !== 0 && motionOK) {
@@ -867,16 +867,21 @@
       heroVideo.src = hsrc; heroVideo.load(); tryPlay(heroVideo, heroMedia);
       /* сама сцена героя лежит под текстом (z-index:-1) — клик ловим на всём экране героя */
       document.querySelector(".hero").addEventListener("click", function(){
-        if (heroMedia._v && heroMedia._v.paused && !heroMedia._v.ended) tryPlay(heroMedia._v, heroMedia);
+        if (heroMedia._v && heroMedia._v.paused) tryPlay(heroMedia._v, heroMedia);
       });
     } else if (heroVideo) { heroVideo.remove(); }
+    function heroOn(on){
+      var v = heroMedia && heroMedia._v; if (!v || heroMedia._on === on) return;
+      heroMedia._on = on;
+      if (on) { if (v.paused && !heroMedia.classList.contains("blocked")) tryPlay(v, heroMedia); } else if (!v.paused) v.pause();
+    }
     function heroUpdate(){              /* лёгкий наезд камеры, пока герой уходит вверх */
       if (!heroMedia || reduce) return;
       var y = window.pageYOffset || document.documentElement.scrollTop, H = vh();
       if (y < H * 1.2) heroMedia.style.transform = "scale(" + (1 + Math.min(y / H, 1) * 0.12) + ")";
     }
 
-    /* ---- главы: видео играет один раз, когда кадр показался; монтаж марки — тоже один раз ---- */
+    /* ---- главы: видео и монтаж марки идут по кругу, пока кадр на экране ---- */
     var chapters = Array.prototype.slice.call(document.querySelectorAll("[data-chapter]"));
     var stages = Array.prototype.slice.call(document.querySelectorAll("[data-chapter] .stage"));
     stages.forEach(function(st){
@@ -899,66 +904,90 @@
       box.style.width = bw + "px"; box.style.height = (bw / r) + "px";
     }
 
-    /* три действия по появлению: подгрузить видео заранее, один раз запустить кадр, показать заголовок */
+    /* мгновенный сброс без обратной анимации: класс-заглушка гасит transition на один кадр */
+    function snap(el, fn){ el.classList.add("snap"); fn(); void el.offsetWidth; el.classList.remove("snap"); }
+
+    /* монтаж марки по кругу: встала на место → пауза → поднялась → снова встала */
+    function animCycle(st){
+      st.classList.add("mounted");
+      st._t = setTimeout(function(){
+        st.classList.remove("mounted");
+        st._t = setTimeout(function(){ animCycle(st); }, 2300);
+      }, 5200);
+    }
+
+    /* кадр на экране — подгрузить и играть по кругу; ушёл — пауза и сброс, вернулся — с начала */
     function loadReel(st){ var v = st._v; if (v && !v.src) { v.preload = "auto"; v.src = v.getAttribute("data-src"); v.load(); } }
-    function fireStage(st){
-      if (st._fired) return; st._fired = true;
-      if (st._anim) st.classList.add("mounted");
-      if (st._v) { st._played = true; loadReel(st); tryPlay(st._v, st); }
+    function stageOn(st, on){
+      if (!!st._on === on) return; st._on = on;
+      if (st._anim) {
+        clearTimeout(st._t);
+        if (on) animCycle(st); else snap(st, function(){ st.classList.remove("mounted"); });
+      }
+      if (st._v) {
+        if (on) { loadReel(st); if (st._played) st._v.currentTime = 0; st._played = true; tryPlay(st._v, st); }
+        else if (!st._v.paused) st._v.pause();
+      }
     }
     var revealEls = chapters.slice(); var portrait = document.getElementById("portrait"); if (portrait) revealEls.push(portrait);
-    function revealEl(el){ el.classList.add("in"); }
+    function revealEl(el, on){ el.classList.toggle("in", on !== false); }
     /* доля элемента, которая сейчас на экране (0..1) */
     function shown(el){
       var r = el.getBoundingClientRect(), H = vh();
       return Math.max(0, Math.min(r.bottom, H) - Math.max(r.top, 0)) / Math.max(1, Math.min(r.height, H));
     }
+    /* вкл. от порога, выкл. только когда элемент ушёл с экрана целиком: без дребезга на границе */
+    function gate(el, at, fn){ var k = shown(el); if (k >= at) fn(true); else if (k === 0) fn(false); }
     /* запасной путь через прокрутку: IntersectionObserver молчит в фоновой вкладке и в старых браузерах */
     function scanVisible(){
       var H = vh();
+      if (heroMedia) gate(heroMedia, .05, heroOn);
       stages.forEach(function(st){
         if (st._v && !st._v.src) { var r = st.getBoundingClientRect(); if (r.top < H * 2.2 && r.bottom > -H * 1.2) loadReel(st); }
-        if (!st._fired && (st._v || st._anim) && shown(st) >= .4) fireStage(st);
+        if (st._v || st._anim) gate(st, .4, function(on){ stageOn(st, on); });
       });
-      revealEls.forEach(function(el){ if (!el.classList.contains("in") && shown(el) >= .2) revealEl(el); });
+      revealEls.forEach(function(el){ gate(el, .2, function(on){ revealEl(el, on); }); });
       if (viewer && !viewer._boot && !saveData) {
         var rv = viewer.getBoundingClientRect();
         if (rv.top < H * 2.5 && rv.bottom > -H) bootViewer();
       }
-      if (board && !board._fired && shown(board) >= .25) drawBoard();
-      if (nums && !nums._fired && shown(nums) >= .4) runNums();
+      if (board) gate(board, .25, boardOn);
+      if (nums) gate(nums, .4, numsOn);
     }
 
+    /* один наблюдатель на эффект: порог включения + полный уход с экрана */
+    function watch(el, at, fn){
+      new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting && e.intersectionRatio >= at - .001) fn(true);
+          else if (!e.isIntersecting) fn(false);
+        });
+      }, {threshold:[0, at]}).observe(el);
+    }
+    /* запускается в конце скрипта: board, nums и viewer к этому моменту уже найдены */
+    function startWatch(){
     if (motionOK) {
       var loader = new IntersectionObserver(function(entries){
         entries.forEach(function(e){ if (e.isIntersecting) { loadReel(e.target); loader.unobserve(e.target); } });
       }, {rootMargin:"120% 0px"});
-      /* кадр показался на 40 % — один запуск, дальше ролик замирает и больше не повторяется */
-      var player = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){ if (e.isIntersecting) { fireStage(e.target); player.unobserve(e.target); } });
-      }, {threshold:.4});
-      stages.forEach(function(st){ if (st._v) loader.observe(st); if (st._v || st._anim) player.observe(st); });
-      var reveal = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){ if (e.isIntersecting) { revealEl(e.target); reveal.unobserve(e.target); } });
-      }, {threshold:.2});
-      revealEls.forEach(function(el){ reveal.observe(el); });
+      if (heroMedia && heroMedia._v) watch(heroMedia, .05, heroOn);
+      stages.forEach(function(st){
+        if (st._v) loader.observe(st);
+        if (st._v || st._anim) watch(st, .4, function(on){ stageOn(st, on); });
+      });
+      revealEls.forEach(function(el){ watch(el, .2, function(on){ revealEl(el, on); }); });
       var near = new IntersectionObserver(function(entries){
         entries.forEach(function(e){ if (e.isIntersecting) { bootViewer(); near.unobserve(e.target); } });
       }, {rootMargin:"150% 0px"});
       if (viewer && !saveData) near.observe(viewer);
-      var drawObs = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){ if (e.isIntersecting) { drawBoard(); drawObs.unobserve(e.target); } });
-      }, {threshold:.25});
-      if (board) drawObs.observe(board);
-      var numsObs = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){ if (e.isIntersecting) { runNums(); numsObs.unobserve(e.target); } });
-      }, {threshold:.4});
-      if (nums) numsObs.observe(nums);
+      if (board) watch(board, .25, boardOn);
+      if (nums) watch(nums, .4, numsOn);
       window.addEventListener("resize", function(){ stages.forEach(function(st){ if (st._anim) fitLayers(st); }); });
     } else {
-      revealEls.forEach(revealEl);
+      revealEls.forEach(function(el){ revealEl(el, true); });
       if (viewer && !saveData) bootViewer();   /* без IntersectionObserver модель всё равно нужна */
-      runNums();
+      numsOn(true);
+    }
     }
 
     /* ---- живая модель: библиотека и GLB подгружаются, когда секция близко ---- */
@@ -984,13 +1013,11 @@
     /* экономия трафика включена — модель только по явному клику по сцене */
     if (viewer && saveData) viewer.addEventListener("click", bootViewer, {once:true});
 
-    /* ---- чертёж: штрихи прячутся заранее (arm), рисуются один раз в порядке лазера ---- */
+    /* ---- чертёж: штрихи прячутся заранее (arm), рисуются в порядке лазера — по кругу, пока виден ---- */
     var board = document.getElementById("board");
-    var cuts = board ? board.querySelectorAll(".cut") : [];
-    if (board && motionOK && cuts.length) board.classList.add("arm");
-    function drawBoard(){
-      if (!board || board._fired || !board.classList.contains("arm")) return;
-      board._fired = true;
+    var cuts = board ? board.querySelectorAll(".cut") : [], drawSec = 0;
+    if (board && motionOK && cuts.length) {
+      board.classList.add("arm");
       var n = cuts.length, slow = Math.min(6, n), fast = n - slow, i, el;
       for (i = 0; i < n; i++) {
         el = cuts[i];
@@ -1002,18 +1029,34 @@
           el.style.setProperty("--t", ".55s");
         }
       }
-      board.classList.add("drawn");
+      drawSec = (fast ? 2.55 : 0) + slow * .3 + .55;
+    }
+    /* нарисовал → полюбовались → лист разом гаснет → рисуется заново */
+    function drawCycle(){
+      board.classList.remove("wipe"); board.classList.add("drawn");
+      board._t = setTimeout(function(){
+        board.classList.add("wipe"); board.classList.remove("drawn");
+        board._t = setTimeout(drawCycle, 900);
+      }, (drawSec + 3) * 1000);
+    }
+    function boardOn(on){
+      if (!board || !board.classList.contains("arm") || !!board._on === on) return;
+      board._on = on; clearTimeout(board._t);
+      if (on) drawCycle(); else snap(board, function(){ board.classList.remove("drawn", "wipe"); });
     }
 
-    /* ---- цифры-пруфы: счёт один раз при появлении ---- */
+    /* ---- цифры-пруфы: счёт заново при каждом появлении ---- */
     var nums = document.getElementById("nums");
     function fmtNum(n){ return String(n).replace(/\B(?=(\d{3})+$)/g, " "); }
-    function runNums(){
-      if (!nums || nums._fired) return; nums._fired = true;
+    function numsOn(on){
+      if (!nums || !!nums._on === on) return; nums._on = on;
+      var run = (nums._run || 0) + 1; nums._run = run;
       Array.prototype.forEach.call(nums.querySelectorAll("b[data-n]"), function(b){
         var target = +b.getAttribute("data-n"), t0 = null;
         if (reduce) { b.textContent = fmtNum(target); return; }
+        if (!on) { b.textContent = "0"; return; }    /* ушли с экрана — обнулить, к возвращению счёт пойдёт снова */
         function step(ts){
+          if (nums._run !== run) return;
           if (!t0) t0 = ts;
           var k = Math.min((ts - t0) / 1200, 1);
           b.textContent = fmtNum(Math.round(target * (1 - Math.pow(1 - k, 3))));
@@ -1022,6 +1065,7 @@
         requestAnimationFrame(step);
       });
     }
+    startWatch();
 
     /* ---- шторка «эскиз → железо» ---- */
     var cmp = document.getElementById("compare");
