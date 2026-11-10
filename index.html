@@ -295,9 +295,11 @@
     .stage{aspect-ratio:4/3}
     .chapter-copy h3{font-size:clamp(40px,12vw,64px); margin-top:-.4em}
     .viewer{height:clamp(320px,56vh,520px)}
-    /* длинная кассета на телефоне ужалась бы в полоску — чертёж листается пальцем, как лист */
-    .board{padding:14px; overflow-x:auto; -webkit-overflow-scrolling:touch}
-    .board .draw-svg{min-width:760px}
+    /* кассета на телефоне целиком во всю ширину (Денис 10.11: листать пальцем не надо); линии толще,
+       иначе при масштабе ~0,1 они тоньше пикселя */
+    .board{padding:10px}
+    .draw-svg .cut{stroke-width:calc(var(--sw,2)*2.2)}
+    .draw-svg .cut:last-child{stroke-width:calc(var(--sw,2)*2.6)}
     .nums{grid-template-columns:repeat(2,minmax(0,1fr))}
     .compare{aspect-ratio:4/3}
     .compare .tag{font-size:11px; padding:5px 10px; bottom:10px}
@@ -383,8 +385,8 @@
       → готовое изделие». Модели оживают, когда появляются на экране.</p>
     <div class="chapters">
 
-      <article class="chapter has-aside" data-chapter>
-        <div class="stage" data-live-at="7.32">
+      <article class="chapter" data-chapter>
+        <div class="stage" data-live-at="4.25">
           <img src="media/tank.jpg" alt="3D-модель гусеничного робота в SolidWorks: открытый кузов, гусеницы, опорные катки" loading="lazy">
           <video class="reel" muted playsinline preload="none" aria-hidden="true" data-src="media/reel-tank.mp4"></video>
           <span class="phase" aria-hidden="true"><span class="ph-model">3D-модель в SolidWorks</span><span class="ph-live">собран и едет</span></span>
@@ -396,12 +398,6 @@
             в железе — машина, которая разворачивается на месте и своим ходом поднимается по лестнице.
             На видео модель и готовый робот сняты с одного ракурса: одно переходит в другое.</p>
           <p class="result">Спроектирован, собран, ездит</p>
-          <figure class="chapter-aside">
-            <div class="frame">
-              <img src="media/tank_real.jpg" alt="Готовый гусеничный робот на льду в той же позе, что и 3D-модель: жёлтый кузов, чёрные гусеницы" loading="lazy">
-            </div>
-            <figcaption>Та же поза вживую: разворот на льду</figcaption>
-          </figure>
         </div>
       </article>
 
