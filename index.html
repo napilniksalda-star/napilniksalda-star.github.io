@@ -425,6 +425,7 @@
   /* ============ ШКУРА «NEO»: неоморфизм — один светло-серый материал, выпуклые карточки, вдавленные поля ============
      Дописывается сборкой в конец стилей kd.template.html (build_gta.py, SKINS). Разметка и эффекты общие. */
   :root:root:root{
+    --model:#3f4b5c;               /* цвет живой 3D-модели: тёмная сталь, чтобы не сливалась со светлым фоном */
     --ink:#e4e8ee; --panel:#e4e8ee; --panel-2:#e4e8ee; --media:#d7dce4;
     --line:transparent; --line-strong:#b9c1cd;
     --muted:#7c8594; --text:#2f3640; --text-dim:#56606e;
@@ -1326,7 +1327,15 @@
       mv.setAttribute("shadow-intensity", "0.8"); mv.setAttribute("exposure", "1.1");
       mv.setAttribute("camera-orbit", "35deg 72deg auto");
       if (!reduce) { mv.setAttribute("auto-rotate", ""); mv.setAttribute("rotation-per-second", "10deg"); }
-      mv.addEventListener("load", function(){ viewer.classList.add("ready"); });
+      mv.addEventListener("load", function(){
+        /* цвет модели задаёт оформление (--model): на светлом фоне светлая сталь сливается — темним */
+        var col = getComputedStyle(viewer).getPropertyValue("--model").trim();
+        if (col && mv.model) mv.model.materials.forEach(function(m){
+          m.pbrMetallicRoughness.setBaseColorFactor(col);
+          m.pbrMetallicRoughness.setMetallicFactor(0.25); m.pbrMetallicRoughness.setRoughnessFactor(0.5);
+        });
+        viewer.classList.add("ready");
+      });
       ["pointerdown", "wheel"].forEach(function(ev){
         mv.addEventListener(ev, function(){ viewer.classList.add("touched"); }, {once:true, passive:true});
       });
