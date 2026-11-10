@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:title" content="Денис Евстегнеев — инженер-конструктор: КМД фасадов, раскрой, DXF, КД">
-<meta property="og:description" content="От эскиза до железа: КМД фасадов НВФ и СФБ, раскрой и DXF под лазер, рабочая КД, нестандартное оборудование. Семь проектов, которые можно показать.">
+<meta property="og:description" content="От эскиза до железа: КМД фасадов НВФ и СФБ, раскрой и DXF под лазер, рабочая КД, нестандартное оборудование. Восемь проектов, которые можно показать.">
 <meta property="og:url" content="https://napilniksalda-star.github.io/">
 <meta property="og:image" content="https://napilniksalda-star.github.io/cover.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -128,6 +128,11 @@
   .stage .tap::before{content:""; width:0; height:0; border-left:12px solid var(--sun); border-top:7px solid transparent; border-bottom:7px solid transparent}
   .stage.blocked .tap{display:inline-flex}
   .stage.blocked{cursor:pointer}
+  /* подпись фазы ролика «модель → железо»: что сейчас на экране, меняется в момент превращения */
+  .stage .phase{position:absolute; left:14px; top:14px; z-index:3; padding:8px 14px; border-radius:999px;
+    background:rgba(20,10,34,.72); backdrop-filter:blur(6px); color:var(--paper); font-size:13px; font-weight:600; pointer-events:none}
+  .stage .phase .ph-live,.stage.live .phase .ph-model{display:none}
+  .stage.live .phase .ph-live{display:inline}
   /* телефон запретил автозапуск героя — та же подсказка, видео пойдёт по касанию в любом месте экрана */
   .hero-media .tap{position:absolute; left:50%; top:62%; transform:translate(-50%,-50%); z-index:3; display:none;
     align-items:center; gap:10px; padding:12px 20px; border-radius:999px; background:rgba(20,10,34,.7);
@@ -374,9 +379,31 @@
 <section id="works" class="works">
   <div class="wrap">
     <h2 class="display sec-title">Работы</h2>
-    <p class="sec-lead">Семь проектов, которые можно показать открыто, остальное под NDA. Каждый — связка «3D-модель
+    <p class="sec-lead">Восемь проектов, которые можно показать открыто, остальное под NDA. Каждый — связка «3D-модель
       → готовое изделие». Модели оживают, когда появляются на экране.</p>
     <div class="chapters">
+
+      <article class="chapter has-aside" data-chapter>
+        <div class="stage" data-live-at="3.85">
+          <img src="media/tank.jpg" alt="3D-модель гусеничного робота в SolidWorks: открытый кузов, гусеницы, опорные катки" loading="lazy">
+          <video class="reel" muted playsinline preload="none" aria-hidden="true" data-src="media/reel-tank.mp4"></video>
+          <span class="phase" aria-hidden="true"><span class="ph-model">3D-модель в SolidWorks</span><span class="ph-live">собран и едет</span></span>
+          <span class="tap" aria-hidden="true">нажмите — модель оживёт</span>
+        </div>
+        <div class="chapter-copy">
+          <h3 class="display">Гусеничный робот</h3>
+          <p class="what">Гусеничная платформа с открытым кузовом, длина 1,3 м. В SolidWorks это сборка на 490 компонентов,
+            в железе — машина, которая разворачивается на месте и своим ходом поднимается по лестнице.
+            На видео модель и готовый робот сняты с одного ракурса: одно переходит в другое.</p>
+          <p class="result">Спроектирован, собран, ездит</p>
+          <figure class="chapter-aside">
+            <div class="frame">
+              <img src="media/tank_real.jpg" alt="Готовый гусеничный робот на льду в той же позе, что и 3D-модель: жёлтый кузов, чёрные гусеницы" loading="lazy">
+            </div>
+            <figcaption>Та же поза вживую: разворот на льду</figcaption>
+          </figure>
+        </div>
+      </article>
 
       <article class="chapter" data-chapter>
         <div class="stage">
@@ -858,6 +885,10 @@
       st._anim = st.hasAttribute("data-anim") && motionOK ? st.querySelector(".layers") : null;
       if (st._anim) { st.classList.add("anim"); fitLayers(st); }
       if (v && src && src.indexOf("{{") !== 0 && motionOK) { st._v = v; wireVideo(v, st); }
+      var liveAt = +st.getAttribute("data-live-at");       /* секунда ролика, когда модель стала живой */
+      if (liveAt && st._v) st._v.addEventListener("timeupdate", function(){
+        st.classList.toggle("live", st._v.currentTime >= liveAt);
+      });
       else if (v) { v.remove(); }
     });
     /* слои повторяют object-fit: cover картинки под ними — коробка с пропорцией исходника, накрывающая кадр */
