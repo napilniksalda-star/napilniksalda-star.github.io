@@ -337,6 +337,9 @@
   .contact .v{font-weight:600; letter-spacing:.01em; font-size:16px}
   /* телефон: подпись над значением — номер и почта не рвутся на «608- / 42-89» */
   @media (max-width:640px){ .contact{flex-wrap:wrap; row-gap:2px} .contact .k{width:100%} .contact .v{flex:1; white-space:nowrap} }
+  a.contact{text-decoration:none; line-height:normal}
+  .contact .arrow{margin-left:auto; color:var(--muted); font-size:15px; transition:color .2s ease}
+  .contact:hover .arrow{color:var(--accent)}
   .contact .copyicon{margin-left:auto; color:var(--muted); font-size:15px; transition:color .2s ease}
   .contact:hover .copyicon{color:var(--accent)}
   .contact.copied{border-color:var(--accent); background:var(--accent-soft)}
@@ -1136,6 +1139,9 @@
           <button class="contact" type="button" data-copy="@dendifox" data-href="https://t.me/dendifox">
             <span class="k mono">Telegram</span><span class="v">@dendifox</span><span class="copyicon mono" aria-hidden="true">⧉</span>
           </button>
+          <a class="contact" href="https://t.me/kmd_kassety" target="_blank" rel="noopener">
+            <span class="k mono">Канал</span><span class="v">Кейсы в Telegram</span><span class="arrow mono" aria-hidden="true">→</span>
+          </a>
           <a class="dl-btn" href="https://napilniksalda-star.github.io/portfolio-evstegneev.pdf" download>
             <span class="dl-tag mono">PDF</span>
             <span class="dl-tx">Скачать портфолио</span>
